@@ -24,6 +24,7 @@
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
+from qgis.core import QgsProject, QgsVectorLayer, QgsFeature, QgsField, QgsFeatureRequest
 
 # Initialize Qt resources from file resources.py
 from .resources import *
@@ -31,17 +32,9 @@ from .resources import *
 from .geo_met_dialog import GeoMetDialog
 import os.path
 
-import subprocess
+from . import _import_libs
+from .services.weather import Weather
 
-try:
-    from decouple import config
-except ImportError:
-    try:
-        subprocess.check_call(['pip', 'install', 'python-decouple'])
-        from decouple import config  # Verify if the installation was successful
-    except subprocess.CalledProcessError as e:
-        # Handle the error, e.g., show a message to the user
-        print(e)
 
 
 class GeoMet:
@@ -200,6 +193,11 @@ class GeoMet:
         if self.first_start == True:
             self.first_start = False
             self.dlg = GeoMetDialog()
+            
+            self.get_all_layers()
+            self.dlg.getWeatherBtn.clicked.connect(self.update_layer)
+            
+            
 
         # show the dialog
         self.dlg.show()
@@ -210,3 +208,82 @@ class GeoMet:
             # Do something useful here - delete the line containing pass and
             # substitute with your code.
             pass
+        
+    # GeoMet
+    def get_all_layers(self):
+        # Clear the ComboBox to ensure it's empty
+        self.dlg.layerList.clear()
+        
+        # Populate the ComboBox with layer names
+        for layer in QgsProject.instance().mapLayers().values():
+            self.dlg.layerList.addItem(layer.name())
+            
+        self.dlg.layerList.currentIndexChanged.connect(self.on_layerList_changed)
+            
+    
+    def on_layerList_changed(self, index):
+        # Get the current index and item text
+        current_index = self.dlg.layerList.currentIndex()
+        selected_item_text = self.dlg.layerList.currentText()
+        
+        self.set_layer_fields(selected_item_text)
+        
+    def set_layer_fields(self, layer_name):
+        # Get the layer by name
+        layer = QgsProject.instance().mapLayersByName(layer_name)[0]
+        self.selected_layer = layer
+
+        # Check if the layer exists
+        if layer:
+            self.dlg.fieldList.clear()
+            # Get the fields from the layer
+            fields = layer.fields()
+           # Get the fields from the layer
+            fields = layer.fields()
+            # Populate the ComboBox with field names
+            for field in fields:
+                self.dlg.fieldList.addItem(field.name())
+        else:
+            print(f"Layer '{layer_name}' not found.")
+            
+            
+    def get_selected_field(self):
+        return self.dlg.fieldList.currentText()
+    
+    def get_selected_layer(self):
+        selected_item_text = self.dlg.layerList.currentText()
+        layer = QgsProject.instance().mapLayersByName(selected_item_text)[0]
+        return layer
+    
+    def update_layer(self):
+        layer = self.selected_layer
+        print(layer.name())
+        # Check if the layer exists
+        if not layer:
+            print(f"Layer '{layer}' not found.")
+        else:
+            # Start an edit session
+            layer.startEditing()
+
+            # Create a feature request to retrieve all features
+            # request = QgsFeatureRequest().setFlags(QgsFeatureRequest.NoGeometry)
+
+            # Iterate through all features in the layer
+            for feature in layer.getFeatures():
+                if feature.geometry() != None:
+                    lat = feature.geometry().asPoint().y()
+                    lon = feature.geometry().asPoint().x()
+                    # create weather instance
+                    weather = Weather()
+                    current_weather = weather.get_current(lat, lon)
+                    feature.setAttribute(self.get_selected_field(), current_weather["current"]["temp_c"])
+                    # Add more attributes as needed
+
+                    # Update the feature in the layer
+                    layer.updateFeature(feature)
+
+            # Commit the changes to the layer
+            layer.commitChanges()
+
+            # End the edit session
+            layer.rollBack()
