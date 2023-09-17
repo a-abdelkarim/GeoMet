@@ -1,0 +1,47 @@
+# This file contains metadata for your plugin.
+
+# This file should be included when you package your plugin.# Mandatory items:
+
+[general]
+name=GeoMet
+qgisMinimumVersion=3.0
+description=The GeoMet plugin is a powerful and user-friendly extension for QGIS, designed to seamlessly integrate real-time weather data with your geospatial projects.
+version=0.1
+author=Ahmed Abdelkarim
+email=a.abdelkarim9696@gmail.com
+
+about=Overview: The GeoMet plugin is a powerful and user-friendly extension for QGIS, designed to seamlessly integrate real-time weather data with your geospatial projects. Whether you're a GIS professional, researcher, or enthusiast, GeoMet simplifies the process of updating and enriching your feature layers with up-to-the-minute weather information. Key Features: - Real-Time Weather Integration: Access current weather conditions, forecasts, and more from a variety of reliable weather data providers. - Customizable Weather Layers: Effortlessly overlay weather data on your maps and customize the appearance to match your project's needs. - User-Friendly Interface: GeoMet's intuitive interface makes it easy for users of all levels to work with geospatial weather data. - Automated Updates: Set up automatic updates to keep your weather information current without manual intervention. - Geospatial Insights: Unlock new insights by correlating weather data with your spatial datasets, enabling data-driven decision-making. - Advanced Symbology: Create visually informative maps by applying advanced symbology options to your weather layers. - Extensive Documentation: Our comprehensive documentation guides you through installation, configuration, and usage of the GeoMet plugin.
+
+tracker=https://github.com/a-abdelkarim/GeoMet/issues
+repository=https://github.com/a-abdelkarim/GeoMet
+# End of mandatory metadata
+
+# Recommended items:
+
+hasProcessingProvider=no
+# Uncomment the following line and add your changelog:
+# changelog=
+
+# Tags are comma separated with spaces allowed
+tags=python,meteorology,weather,gis,forecast,qgis
+
+homepage=https://github.com/a-abdelkarim/GeoMet
+category=Plugins
+icon=icon.png
+# experimental flag
+experimental=True
+
+# deprecated flag (applies to the whole plugin, not just a single version)
+deprecated=False
+
+# Since QGIS 3.8, a comma separated list of plugins to be installed
+# (or upgraded) can be specified.
+# Check the documentation for more information.
+# plugin_dependencies=
+
+Category of the plugin: Raster, Vector, Database or Web
+# category=
+
+# If the plugin can run on QGIS Server.
+server=False
+
