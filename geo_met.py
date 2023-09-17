@@ -31,6 +31,18 @@ from .resources import *
 from .geo_met_dialog import GeoMetDialog
 import os.path
 
+import subprocess
+
+try:
+    from decouple import config
+except ImportError:
+    try:
+        subprocess.check_call(['pip', 'install', 'python-decouple'])
+        from decouple import config  # Verify if the installation was successful
+    except subprocess.CalledProcessError as e:
+        # Handle the error, e.g., show a message to the user
+        print(e)
+
 
 class GeoMet:
     """QGIS Plugin Implementation."""
