@@ -34,6 +34,7 @@ import os.path
 
 from . import _import_libs
 from .services.weather import Weather
+from .jobs.update_weather import UpdateWeatherJobManager
 
 
 
@@ -174,6 +175,8 @@ class GeoMet:
 
         # will be set False in run()
         self.first_start = True
+        
+        self.update_weather_job_manager = UpdateWeatherJobManager()
 
 
     def unload(self):
@@ -196,6 +199,7 @@ class GeoMet:
             
             self.get_all_layers()
             self.dlg.getWeatherBtn.clicked.connect(self.update_layer)
+            self.dlg.startJobBtn.clicked.connect(self.update_weather_job_manager.start_background_task)
             
             
 
@@ -277,6 +281,7 @@ class GeoMet:
                     weather = Weather()
                     current_weather = weather.get_current(lat, lon)
                     feature.setAttribute(self.get_selected_field(), current_weather["current"]["temp_c"])
+                    feature.setAttribute('latest_up', current_weather["current"]["last_updated"])
                     # Add more attributes as needed
 
                     # Update the feature in the layer
