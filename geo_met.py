@@ -21,7 +21,7 @@
  *                                                                         *
  ***************************************************************************/
 """
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
+from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QTimer
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 from qgis.core import QgsProject, QgsVectorLayer, QgsFeature, QgsField, QgsFeatureRequest
@@ -31,6 +31,7 @@ from .resources import *
 # Import the code for the dialog
 from .geo_met_dialog import GeoMetDialog
 import os.path
+import threading
 
 from . import _import_libs
 from .services.weather import Weather
@@ -72,6 +73,14 @@ class GeoMet:
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
         self.first_start = None
+        
+        
+         # Create a QTimer
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update_layer)
+        
+        # Start the timer with a 10-second interval (10000 milliseconds)
+        self.timer.start(10000)
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -199,7 +208,24 @@ class GeoMet:
             
             self.get_all_layers()
             self.dlg.getWeatherBtn.clicked.connect(self.update_layer)
-            self.dlg.startJobBtn.clicked.connect(self.update_weather_job_manager.start_background_task)
+            # self.dlg.startJobBtn.clicked.connect(self.update_weather_job_manager.start_continuous_task)
+            import threading
+            import time
+
+            # Create a function execution timer
+            def execute_function_timer():
+                print("hey")
+                while True:
+                    self.update_weather_job_manager.start_background_task  # Call your function
+                    time.sleep(10)  # Sleep for 5 seconds
+
+            # Create a thread for the timer
+            timer_thread = threading.Thread(target=execute_function_timer)
+
+            # Start the timer thread
+            timer_thread.start()
+
+            # You can stop the timer thread by calling timer_thread.stop() or use some other mechanism to control its execution.
             
             
 
